@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>die Odyssee</title>
+</head>
+<body>
+    <h2>die Odyssee</h2>
+    <input id="room" placeholder="Enter room ID" />
+    <button onclick="connect()">Raum betreten</button>
+
+    <div id="game" style="display:none;">
+        <ul id="messages"></ul>
+        <input id="msgInput" type="text" placeholder="Guess the answer...">
+        <button onclick="sendMessage()">Senden</button>
+    </div>
+
+    <script>
+        let socket;
+
+        function connect() {
+            const room = document.getElementById("room").value;
+            socket = new WebSocket(`ws://localhost:8000/ws/${room}`);
+
+            socket.onmessage = function(event) {
+                const msg = document.createElement("li");
+                msg.textContent = event.data;
+                document.getElementById("messages").appendChild(msg);
+            };
+
+            document.getElementById("game").style.display = "block";
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("msgInput");
+            socket.send(input.value);
+            input.value = "";
+        }
+    </script>
+</body>
+</html>

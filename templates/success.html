@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("static/images/success1.jpg");  /* Set background image */
+            background-size: cover;  /* Cover the entire screen */
+
+            position: absolute;
+            top: 10px;  /* Moves down */
+            left: 50px; /* Moves right */
+        }
+        .top-right {
+          position: fixed;
+          top: 100px;
+          right: 100px; width: 300px; background-color: lightblue;
+        }
+    </style>
+    <title>Escape Room</title>
+</head>
+<body>
+    <h2>Gut gemacht! Du hast die Odysee durchgespielt und verschiedene Aufgaben erfolgreich bewältigt.🎉</h2>
+    <div id="messageb" class="top-right">
+        <ul id="messages"><p>Gut gemacht {{ users }}！🎉🎉🎉</p></ul>
+        <ul id="web_message"></ul>
+        <input id=room type="hidden" name="room" value="{{room}}">
+
+    </div>
+</body>
+</html>

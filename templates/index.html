@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>die Odyssee</title>
+     <style>
+         .paper {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    padding: 40px;
+    background: #fff; /* pure white */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* soft shadow */
+    border-radius: 4px; /* optional: slightly rounded corners */
+}
+         h1 {
+             font-family: "Verdana", sans-serif;
+             font-weight: bold;
+             color:red
+            }
+        body {
+            background-image: url("static/images/background.PNG");  /* Set background image */
+            background-size: cover;  /* Cover the entire screen */
+            position: absolute;
+            top: 10px;  /* Moves down */
+            left: 50px; /* Moves right */
+            font-family: "Georgia", serif;
+            font-size: 26px;  /* Default text size */
+            font-weight: 700; /* Normal weight */
+            line-height: 1.5; /* Improves readability */
+        }
+        .top-right {
+          position: fixed;
+          top: 100px;
+          right: 100px; width: 300px; background-color: lightblue;
+        }
+    </style>
+
+    <script>
+        let timeLeft = 30;  // 每个谜题限时 30 秒
+        function startTimer() {
+
+            let timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById("message").innerText = "时间到！游戏失败！";
+                    document.getElementById("message").style.color = "red";
+                    document.getElementById("answerForm").style.display = "none";
+                } else {
+                    document.getElementById("timer").innerText = "剩余时间：" + timeLeft + " 秒";
+                    document.getElementById("timer").style.color = "blue";
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+        //window.onload = startTimer;
+    </script>
+</head>
+<body>
+    <h2>die Odyssee</h2>
+
+    <p style="width: 600px; background-color: #f0f0f0; box-shadow: 0 0 5px rgba(0,0,0,0.1);">
+        {{ puzzle.question }}</p>
+    {% if puzzle.selections %}
+        <ul style="width: 500px; background-color: #f0f0f0;">
+        {% for selection in puzzle.selections %}
+            <li>{{ selection }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if puzzle.audio %}
+    <p><audio controls autoplay hidden="hidden"><source src="{{ puzzle.audio }}" type="audio/mpeg"></audio></p>
+    {% endif %}
+    {% if puzzle.video%}
+    <p><video width="640" height="360" controls autoplay>
+        <source src="{{ puzzle.video }}" type="video/mp4"></video>
+    </p>
+    {% endif %}
+    {% if puzzle.image %}
+    <p><img src="{{ puzzle.image }}" width="300"></p>
+    {% endif %}
+    <!--<p id="timer">Time Left：30 Sec</p>-->
+    <div class="top-right" id="messageb"  >
+        <ul id="messages"><p>Hallo {{ users }} im Raum {{room}}</p></ul>
+        <ul id="web_message"></ul>
+    </div>
+    <form action="/solve" method="post" id="answerForm">
+        <input id="msgInput" type="text" name="answer" placeholder="{{puzzle.hint}}" required>
+        <input id=puzzleIndex type="hidden" name="puzzle_index" value="{{ puzzle_index }}">
+        <input id=room type="hidden" name="room" value="{{room}}">
+        <button  onclick="sendMessage(document.getElementById('room').value)" type="submit">Submit Answer</button>
+    </form>
+    <p id="message">{{ message }}</p>
+</body>
+</html>

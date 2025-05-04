@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>die Odyssee</title>
+     <style>
+         h1 {
+             font-family: "Verdana", sans-serif;
+             font-weight: bold;
+             color:red
+            }
+        body {
+            background-image: url("static/images/background.PNG");  /* Set background image */
+            background-size: cover;  /* Cover the entire screen */
+            position: absolute;
+            top: 10px;  /* Moves down */
+            left: 50px; /* Moves right */
+            font-family: "Georgia", serif;
+            font-size: 26px;  /* Default text size */
+            font-weight: 700; /* Normal weight */
+            line-height: 1.5; /* Improves readability */
+        }
+        .top-right {
+          position: fixed;
+          top: 100px;
+          right: 100px; width: 300px; background-color: lightblue;
+        }
+        label {
+            display: inline-block;
+            width: 220px;
+        }
+    </style>
+
+
+    <script>
+        let socket;
+        let room_id = null;
+        let messages = null;
+
+        function connect() {
+            document.getElementById("iroom").style.display ="none";
+            document.getElementById("imessages").style.display = "block";
+
+            const room = document.getElementById("room").value;
+            const username = document.getElementById("username").value;
+            if (room === "" || username === "" ) {
+                alert("Please fill in all fields.");
+                return document;
+            }
+            socket = new WebSocket(`ws://0.0.0.0:8000/ws/${room}/${username}`);
+            room_id = room
+            socket.onmessage = function(event) {
+                console.log("Received message: " + event.data);
+                const puzzleIndex = event.data.split(': ').pop();
+
+                if (event.data.startsWith("Index: ")) {
+
+                    goToGame(room_id, puzzleIndex);
+                } else if (event.data.includes("solved")) {
+                    messages = `<p>${event.data}</p>`;
+                    document.getElementById("web_message").innerHTML += messages;
+                    goToGame(room_id, puzzleIndex);
+
+                } else {
+                    messages = `<p>${event.data}</p>`;
+                    document.getElementById("web_message").innerHTML += messages;
+                }
+            };
+
+            document.getElementById("game").style.display = "block";
+        }
+
+
+        function submitForm(data,room_id) {
+
+              const formData = new FormData();
+              formData.append("answer", data);
+              formData.append("room", room_id);
+              formData.append("puzzle_index", document.getElementById("puzzleIndex").value);
+              console.error("The room: " + room_id);
+              console.error("The answer: " + data);
+              fetch("/solve", {
+                method: "POST",
+                body: formData,
+              })
+              .then(response => response.text())  // if server returns HTML
+              .then(html => {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, "text/html");
+                  doc.getElementById("messageb").style.display = "block";
+                  // Now doc is a real Document object
+
+                  doc.getElementById("web_message").innerHTML += messages;
+
+                  // Then replace the current body with the parsed body
+                  document.body.innerHTML = doc.body.innerHTML;
+              })
+              .catch(error => console.error("Error:", error));}
+
+
+         // 每个谜题限时 30 秒
+        function startTimer() {
+            timeLeft = 90;
+            let timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById("message").innerText = "TIME OUT! GAME OVER!";
+                    document.getElementById("message").style.color = "red";
+                    document.getElementById("answerForm").style.display = "none";
+                } else {
+                    document.getElementById("timer").innerText = "TIME LEFT：" + timeLeft + " S";
+                    document.getElementById("timer").style.color = "blue";
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+        function sendMessage(room) {
+            room_id = room
+            const input = document.getElementById("msgInput");
+            socket.send(input.value);
+            submitForm(input.value,room_id);
+            input.value = "";
+        }
+         function go(room) {
+            socket.send("which puzzle: " + room);
+         }
+        function goToGame(room,index) {
+            console.error("Go to game: " + room);
+            const params = new URLSearchParams({
+              room_id: room, index:index,
+            });
+            fetch(`/?${params}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "text/html"
+            }})
+          .then(response => response.text())  // if server returns HTML
+          .then(html => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, "text/html");
+
+              // Now doc is a real Document object
+              doc.getElementById("room").value = room;
+
+              // Then replace the current body with the parsed body
+
+              doc.getElementById("messageb").style.display = "block";
+
+              doc.getElementById("web_message").innerHTML += messages;
+
+              // Then replace the current body with the parsed body
+              document.body.innerHTML = doc.body.innerHTML;
+          })
+          .catch(error => console.error("Error:", error));}
+    </script>
+</head>
+<body>
+    <h2>die Odyssee</h2>
+    <div id="iroom">
+        <p
+            style="width: 700px; color: brown;  box-shadow: 0 0 5px rgba(0,0,0,0.1);">
+            Anleitung:<br>
+            Die Odyssee ist ein Escape Room, welches von Ping, Clara, Nike und Calla gemacht wurde. Es ist ideal für Leute ab der achten Klasse, die Lateinkenntnisse besitzen. Unten kannst du deinen Namen und einen Raumnamen eingeben. Wenn du mit einem Freund zusammenspielen willst, dann müsst ihr denselben Raumnamen eingeben. Wenn nicht dann gibt ihr einfach verschiedene ein. Im Spiel müsst ihr unbedingt darauf achten wo ihr Leerzeichen und Punkte setzt und das ihr alle Wörter richtig schreibt! Die Tipps sind nur Tipps und enthalten deswegen meistens nicht die richtige Lösung. Alle Rätsel, Bilder usw. wurden von Nike, Clara und Calla gemacht und das digitale von Ping. Quellen sind das Lateinbuch Pontes und Wikepedia.</p>
+        <ul id="login">
+            <li><label for="room" >Raum:</label>
+            <input id="room" placeholder="Raum eingeben" /></li>
+
+            <li><label  for="username" >Name:</label>
+            <input id="username" placeholder="Name eingeben" /></li>
+        </ul>
+        <button onclick="connect()">Raum betreten</button>
+    </div>
+    <div id="imessages" style="display:none;">
+        <ul id="web_message"></ul>
+    </div>
+    <div id="game" style="display:none;">
+        <button onclick="go(document.getElementById('room').value)">Spiel starten</button>
+    </div>
+</body>
+</html>
