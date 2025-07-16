@@ -118,16 +118,16 @@
         function sendMessage(room) {
             room_id = room
             const input = document.getElementById("msgInput");
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(input.value);
-            }
+            socket.onopen = () => {
+              socket.send(input.value);
+            };
             submitForm(input.value,room_id);
             input.value = "";
         }
         function go(room) {
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send("which puzzle: " + room);
-            }
+            socket.onopen = () => {
+              socket.send("which puzzle: " + room);
+            };
         }
         function goToGame(room,index) {
             console.error("Go to game: " + room);
