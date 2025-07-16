@@ -48,7 +48,7 @@
             }
             const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
             const host = window.location.hostname;
-            socket = new WebSocket(`${wsProtocol}://${host}:8000/ws/${room}/${username}`);
+            socket = new WebSocket(`${wsProtocol}://${host}:8080/ws/${room}/${username}`);
             room_id = room
             socket.onmessage = function(event) {
                 console.log("Received message: " + event.data);
