@@ -46,7 +46,9 @@
                 alert("Please fill in all fields.");
                 return document;
             }
-            socket = new WebSocket(`wss://0.0.0.0:8000/ws/${room}/${username}`);
+            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const host = window.location.hostname;
+            socket = new WebSocket(`${wsProtocol}://${host}:8000/ws/${room}/${username}`);
             room_id = room
             socket.onmessage = function(event) {
                 console.log("Received message: " + event.data);
