@@ -13,5 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of your application
 COPY . .
 
+EXPOSE 8080
 # Command to run your app (adjust as needed)
 CMD ["python", "main.py"]
