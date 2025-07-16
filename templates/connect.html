@@ -46,7 +46,7 @@
                 alert("Please fill in all fields.");
                 return document;
             }
-            socket = new WebSocket(`ws://0.0.0.0:8000/ws/${room}/${username}`);
+            socket = new WebSocket(`wss://0.0.0.0:8000/ws/${room}/${username}`);
             room_id = room
             socket.onmessage = function(event) {
                 console.log("Received message: " + event.data);
